@@ -1,0 +1,20 @@
+services:
+  php:
+    container_name: titania-php
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    # networks:
+    #   - aurora_network
+
+# networks:
+#   aurora_network:
+#     driver: bridge
+
+# volumes:
+#   aurora_psql_data:
