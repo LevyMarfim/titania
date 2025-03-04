@@ -2,19 +2,48 @@ services:
   php:
     container_name: titania-php
     build:
-      context: ./
-      dockerfile: ./Dockerfile
-    restart: unless-stopped
-    tty: true
+      context: ./docker/php
+      dockerfile: Dockerfile
+    restart: always
+    # tty: true
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-    # networks:
-    #   - aurora_network
+    networks:
+      - titania_network
+  
+  nginx:
+    container_name: titania-nginx
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    restart: always
+    # tty: true
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - titania_network
+  
+  # db:
+  #   image: postgres:latest
+  #   container_name: postgres
+  #   restart: always
+  #   ports:
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_USER: naruto
+  #     POSTGRES_PASSWORD: naruto
+  #     POSTGRES_DB: naruto
+  #   volumes:
+  #     - ./pg_data:/var/lib/postgresql/data
 
-# networks:
-#   aurora_network:
-#     driver: bridge
+networks:
+  titania_network:
+    driver: bridge
 
 # volumes:
-#   aurora_psql_data:
+#   titania_psql_data:
