@@ -11,10 +11,6 @@ class Home extends AbstractController
     #[Route('/')]
     public function home(): Response
     {
-        $gothicNumber = 528;
-
-        return $this->render('main/home.html.twig', [
-            'gothNum' => $gothicNumber,
-        ]);
+        return $this->render('main/home.html.twig');
     }
 }
