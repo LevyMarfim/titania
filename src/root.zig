@@ -40,7 +40,9 @@ pub fn formatFactorization(allocator: std.mem.Allocator, spf: []u32, num: usize)
 
     var temp = num;
     var first = true;
+    var first_power = true;
 
+    // First pass: write expanded form (2*2*3*3*3)
     while (temp > 1) {
         const p = spf[temp];
         var count: u32 = 0;
@@ -49,10 +51,31 @@ pub fn formatFactorization(allocator: std.mem.Allocator, spf: []u32, num: usize)
             count += 1;
         }
 
-        if (!first) try result.append('*');
-        first = false;
+        // Add each prime factor individually for expanded form
+        var i: u32 = 0;
+        while (i < count) : (i += 1) {
+            if (!first) try result.append('*');
+            first = false;
+            try result.writer().print("{}", .{p});
+        }
+    }
 
-        // Use result.writer() to get a writer that supports print
+    // Add " = " separator
+    try result.appendSlice(" = ");
+
+    // Second pass: write powered form (2^2*3^3)
+    temp = num; // Reset temp
+    while (temp > 1) {
+        const p = spf[temp];
+        var count: u32 = 0;
+        while (temp % p == 0) {
+            temp /= p;
+            count += 1;
+        }
+
+        if (!first_power) try result.append('*');
+        first_power = false;
+
         if (count == 1) {
             try result.writer().print("{}", .{p});
         } else {
@@ -86,16 +109,32 @@ test "SPF for 10" {
     }
 }
 
-test "format factorization" {
+test "format factorization expanded" {
     const allocator = testing.allocator;
-    const spf = try computeSPF(allocator, 10);
+    const spf = try computeSPF(allocator, 108);
     defer allocator.free(spf);
 
-    const result = try formatFactorization(allocator, spf, 4);
+    const result = try formatFactorization(allocator, spf, 108);
     defer allocator.free(result);
-    try testing.expectEqualStrings("2^2", result);
+    try testing.expectEqualStrings("2*2*3*3*3 = 2^2*3^3", result);
+}
 
-    const result2 = try formatFactorization(allocator, spf, 6);
-    defer allocator.free(result2);
-    try testing.expectEqualStrings("2*3", result2);
+test "format factorization prime number" {
+    const allocator = testing.allocator;
+    const spf = try computeSPF(allocator, 7);
+    defer allocator.free(spf);
+
+    const result = try formatFactorization(allocator, spf, 7);
+    defer allocator.free(result);
+    try testing.expectEqualStrings("7 = 7", result);
+}
+
+test "format factorization 1" {
+    const allocator = testing.allocator;
+    const spf = try computeSPF(allocator, 1);
+    defer allocator.free(spf);
+
+    const result = try formatFactorization(allocator, spf, 1);
+    defer allocator.free(result);
+    try testing.expectEqualStrings("1", result);
 }
